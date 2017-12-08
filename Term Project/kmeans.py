@@ -1,9 +1,9 @@
-
 import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
 from collections import defaultdict
 from sklearn import metrics
+from sklearn.preprocessing import normalize
 
 
 #Functions Segment
@@ -41,6 +41,7 @@ init='k-means++'
 
 X_train_df = fv_df[['GR','ILD_log10','PE', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
 X_train = X_train_df.as_matrix()
+X_train = normalize(X_train, axis=0)
 Y_train_df = fv_df['Facies']
 Y_train = Y_train_df.as_matrix()
 
