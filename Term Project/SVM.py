@@ -5,12 +5,34 @@ from collections import defaultdict
 from sklearn import metrics
 from sklearn.preprocessing import normalize
 import random
+from sklearn.model_selection import KFold
+from sklearn.metrics import accuracy_score
 
 
 #Functions Segment
+def use_kfolds(X,Y,n_splits,svm):
+    kf = KFold(n_splits=n_splits, random_state=None, shuffle=False)
+    accuracy = []
+    indices = []
+    for train_in, test_in in kf.split(X):
+        X_train = X[train_in]
+        Y_train = Y[train_in]
+        X_vald = X[test_in]
+        Y_vald = Y[test_in]
+        svm.fit(X_train, Y_train)
+        y_hat = svm.predict(X_vald)
+        accuracy.append(accuracy_score(Y_vald, y_hat))
+        indices.append([[[train_in[0],train_in[-1]],[test_in[0],test_in[-1]]]])
+    return accuracy,indices
 
-
-
+def use_SVC_reg(X,Y,percentage,svc):
+    X_train = X[:int(len(X)*percentage)]
+    X_vald = X[int(len(X)*percentage):]
+    Y_train = Y[:int(len(Y)*percentage)]
+    Y_vald = Y[int(len(Y)*percentage):]
+    svc.fit(X_train,Y_train)
+    y_hat = svc.predict(X_vald)
+    return accuracy_score(Y_vald, y_hat)
 
 #End of Functions Segment
 
@@ -27,28 +49,6 @@ test_data_df = pd.read_csv(test_data)
 fv_df = fv_df.fillna(0)
 test_data_df = test_data_df.fillna(0)
 
-#MLP PARAMS
-hidden_layer_sizes=(4,25)
-activation='tanh'
-solver='adam'
-alpha=0.0001
-batch_size='auto'
-learning_rate='constant'
-learning_rate_init=0.001
-power_t=0.5
-max_iter=200000
-shuffle=True
-random_state=None
-tol=0.0001
-verbose=False
-warm_start=False
-momentum=0.9
-nesterovs_momentum=True
-early_stopping=False
-validation_fraction=0.1
-beta_1=0.9
-beta_2=0.999
-epsilon=1e-08
 
 
 
@@ -60,77 +60,47 @@ epsilon=1e-08
 # print test_data_df
 
 
+#Training & Validation Segment
 
-
-X_train_df = fv_df[['GR','ILD_log10','PE', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-# X_train_df = fv_df[['GR','ILD_log10', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-X = X_train_df.as_matrix()
+X = fv_df[['GR','ILD_log10','PE', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
+X = X.as_matrix()
 # X = normalize(X, axis=0)
-X_train = X[:int(len(X)*0.9)]
-X_vald = X[int(len(X)*0.9):]
 
-Y_train_df = fv_df['Facies']
-Y = Y_train_df.as_matrix()
-Y_train = Y[:int(len(Y)*0.9)]
-Y_vald = Y[int(len(Y)*0.9):]
-
-X_test_df = test_data_df[['GR','ILD_log10','PE', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-X_test = X_test_df.as_matrix()
-# Y_test_df = test_data_df['Facies']
-# Y_test = Y_test_df.as_matrix()
-
-
+Y = fv_df['Facies']
+Y = Y.as_matrix()
 
 svc = SVC(decision_function_shape='ovo', kernel='rbf')
 
-svc.fit(X_train,Y_train)
-
-y_hat = svc.predict(X_vald)
-
-accuracy = 0.0
-count = 0.0
-for i in range(0, len(y_hat)):
-    if y_hat[i] == Y_vald[i]:
-        count += 1
-    # if y_hat[i] == Y[i]:
-    #     count += 1
-
-accuracy = count/len(y_hat)
-print 'Accuracy: {0:.2f}'.format(accuracy)
+percentage = .9
+reg_acc = use_SVC_reg(X,Y,percentage,svc)
+print 'Accuracy at {0:}% Seperation: {1:.2f}\n'.format(percentage*100, reg_acc)
+folds = 10
+print 'Using {}-Folds'.format(folds)
+kfold_acc, kfold_ind = use_kfolds(X,Y,folds,svc)
+print 'KFolds Accuracies: {0:},\nhighest: {1:.2f} - {2:}'.format(kfold_acc,kfold_acc[np.argmax(kfold_acc)], kfold_ind[np.argmax(kfold_acc)])
 print 82 * '_'
-X_train_df = fv_df[['GR','ILD_log10', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-# X_train_df = fv_df[['GR','ILD_log10', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-X = X_train_df.as_matrix()
+
+
+print 'NO PE'
+X = fv_df[['GR','ILD_log10', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
+X = X.as_matrix()
 # X = normalize(X, axis=0)
-X_train = X[:int(len(X)*0.9)]
-X_vald = X[int(len(X)*0.9):]
 
-Y_train_df = fv_df['Facies']
-Y = Y_train_df.as_matrix()
-Y_train = Y[:int(len(Y)*0.9)]
-Y_vald = Y[int(len(Y)*0.9):]
-
-X_test_df = test_data_df[['GR','ILD_log10', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-X_test = X_test_df.as_matrix()
-# Y_test_df = test_data_df['Facies']
-# Y_test = Y_test_df.as_matrix()
-
-
+Y = fv_df['Facies']
+Y = Y.as_matrix()
 
 svc = SVC(decision_function_shape='ovo', kernel='rbf')
 
-svc.fit(X_train,Y_train)
 
-y_hat = svc.predict(X_vald)
 
-accuracy = 0.0
-count = 0.0
-for i in range(0, len(y_hat)):
-    if y_hat[i] == Y_vald[i]:
-        count += 1
-    # if y_hat[i] == Y[i]:
-    #     count += 1
+percentage = .9
+reg_acc = use_SVC_reg(X,Y,percentage,svc)
+print 'Accuracy at {0:}% Seperation: {1:.2f}\n'.format(percentage*100, reg_acc)
+folds = 10
+print 'Using {}-Folds'.format(folds)
+kfold_acc, kfold_ind = use_kfolds(X,Y,10,svc)
+print 'KFolds Accuracies: {0:},\nhighest: {1:.2f} - {2:}'.format(kfold_acc,kfold_acc[np.argmax(kfold_acc)], kfold_ind[np.argmax(kfold_acc)])
+print 82 * '_'
 
-accuracy = count/len(y_hat)
-print 'NO PE'
-print 'Accuracy: {0:.2f}'.format(accuracy)
+
+#Testing Segment
