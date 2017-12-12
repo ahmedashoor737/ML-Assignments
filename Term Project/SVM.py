@@ -4,6 +4,7 @@ from sklearn.svm import SVC
 from collections import defaultdict
 from sklearn import metrics
 from sklearn.preprocessing import normalize
+import random
 
 
 #Functions Segment
@@ -61,17 +62,17 @@ epsilon=1e-08
 
 
 
-# X_train_df = fv_df[['GR','ILD_log10','PE', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-X_train_df = fv_df[['GR','ILD_log10', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
+X_train_df = fv_df[['GR','ILD_log10','PE', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
+# X_train_df = fv_df[['GR','ILD_log10', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
 X = X_train_df.as_matrix()
-X = normalize(X, axis=0)
-# X_train = X[:int(len(X)*0.7)]
-# X_vald = X[int(len(X)*0.7):]
+# X = normalize(X, axis=0)
+X_train = X[:int(len(X)*0.9)]
+X_vald = X[int(len(X)*0.9):]
 
 Y_train_df = fv_df['Facies']
 Y = Y_train_df.as_matrix()
-Y_train = Y[:int(len(Y)*0.7)]
-Y_vald = Y[int(len(Y)*0.7):]
+Y_train = Y[:int(len(Y)*0.9)]
+Y_vald = Y[int(len(Y)*0.9):]
 
 X_test_df = test_data_df[['GR','ILD_log10','PE', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
 X_test = X_test_df.as_matrix()
@@ -80,19 +81,56 @@ X_test = X_test_df.as_matrix()
 
 
 
-svc = SVC(decision_function_shape='ovo', kernel='poly', class_weight=)
+svc = SVC(decision_function_shape='ovo', kernel='rbf')
 
-svc.fit(X,Y)
+svc.fit(X_train,Y_train)
 
-y_hat = svc.predict(X)
+y_hat = svc.predict(X_vald)
 
 accuracy = 0.0
 count = 0.0
 for i in range(0, len(y_hat)):
-    # if y_hat[i] == Y_vald[i]:
-    #     count += 1
-    if y_hat[i] == Y[i]:
+    if y_hat[i] == Y_vald[i]:
         count += 1
+    # if y_hat[i] == Y[i]:
+    #     count += 1
 
 accuracy = count/len(y_hat)
+print 'Accuracy: {0:.2f}'.format(accuracy)
+print 82 * '_'
+X_train_df = fv_df[['GR','ILD_log10', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
+# X_train_df = fv_df[['GR','ILD_log10', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
+X = X_train_df.as_matrix()
+# X = normalize(X, axis=0)
+X_train = X[:int(len(X)*0.9)]
+X_vald = X[int(len(X)*0.9):]
+
+Y_train_df = fv_df['Facies']
+Y = Y_train_df.as_matrix()
+Y_train = Y[:int(len(Y)*0.9)]
+Y_vald = Y[int(len(Y)*0.9):]
+
+X_test_df = test_data_df[['GR','ILD_log10', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
+X_test = X_test_df.as_matrix()
+# Y_test_df = test_data_df['Facies']
+# Y_test = Y_test_df.as_matrix()
+
+
+
+svc = SVC(decision_function_shape='ovo', kernel='rbf')
+
+svc.fit(X_train,Y_train)
+
+y_hat = svc.predict(X_vald)
+
+accuracy = 0.0
+count = 0.0
+for i in range(0, len(y_hat)):
+    if y_hat[i] == Y_vald[i]:
+        count += 1
+    # if y_hat[i] == Y[i]:
+    #     count += 1
+
+accuracy = count/len(y_hat)
+print 'NO PE'
 print 'Accuracy: {0:.2f}'.format(accuracy)
