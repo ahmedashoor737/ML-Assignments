@@ -1,9 +1,7 @@
-import pandas as pd
-import numpy as np
 from sklearn.cluster import KMeans
 from collections import defaultdict
 from sklearn import metrics
-from sklearn.preprocessing import normalize
+import data
 
 
 #Functions Segment
@@ -13,42 +11,11 @@ from sklearn.preprocessing import normalize
 
 #End of Functions Segment
 
-
-#File names
-fv = './facies_vectors.csv'
-test_data = './test_data_nofacies.csv'
-
-fv_df = pd.read_csv(fv)
-test_data_df = pd.read_csv(test_data)
-
-#Dealing with NaNs
-fv_df = fv_df.fillna(0)
-test_data_df = test_data_df.fillna(0)
+X_train, Y_train, X_test = data.get(normalize_X=True, fill_na=True, verbose=True)
 
 #Kmeans PARAMS
 n_clusters = 9
 init='k-means++'
-
-
-
-
-
-#DataFrame Exploration
-# print fv_df
-# print 82 * '_'
-# print test_data_df
-
-
-X_train_df = fv_df[['GR','ILD_log10','PE', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-X_train = X_train_df.as_matrix()
-X_train = normalize(X_train, axis=0)
-Y_train_df = fv_df['Facies']
-Y_train = Y_train_df.as_matrix()
-
-X_test_df = test_data_df[['GR','ILD_log10','PE', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-X_test = X_test_df.as_matrix()
-# Y_test_df = test_data_df['Facies']
-# Y_test = Y_test_df.as_matrix()
 
 
 km = KMeans(n_clusters=n_clusters, init=init)
