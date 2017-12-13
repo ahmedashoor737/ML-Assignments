@@ -1,13 +1,11 @@
-import pandas as pd
 import numpy as np
 from sklearn.svm import SVC
 from collections import defaultdict
 from sklearn import metrics
-from sklearn.preprocessing import normalize
 import random
 from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score
-
+import data
 
 #Functions Segment
 def use_kfolds(X,Y,n_splits,svm):
@@ -36,38 +34,9 @@ def use_SVC_reg(X,Y,percentage,svc):
 
 #End of Functions Segment
 
-
-#File names
-fv = './facies_vectors.csv'
-test_data = './test_data_nofacies.csv'
-
-#Reading CSVs
-fv_df = pd.read_csv(fv)
-test_data_df = pd.read_csv(test_data)
-
-#Dealing with NaNs
-fv_df = fv_df.fillna(0)
-test_data_df = test_data_df.fillna(0)
-
-
-
-
-
-
-#DataFrame Exploration
-# print fv_df
-# print 82 * '_'
-# print test_data_df
-
+X, Y, X_test = data.get(fill_na=True, verbose=True) #, normalize_X=True)
 
 #Training & Validation Segment
-
-X = fv_df[['GR','ILD_log10','PE', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-X = X.as_matrix()
-# X = normalize(X, axis=0)
-
-Y = fv_df['Facies']
-Y = Y.as_matrix()
 
 svc = SVC(decision_function_shape='ovo', kernel='rbf')
 
@@ -82,12 +51,8 @@ print 82 * '_'
 
 
 print 'NO PE'
-X = fv_df[['GR','ILD_log10', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-X = X.as_matrix()
-# X = normalize(X, axis=0)
 
-Y = fv_df['Facies']
-Y = Y.as_matrix()
+X, Y, X_test = data.get(without_PE=True, fill_na=True, verbose=True) #, normalize_X=True)
 
 svc = SVC(decision_function_shape='ovo', kernel='rbf')
 
