@@ -1,12 +1,10 @@
-import pandas as pd
 import numpy as np
 from sklearn.neural_network import MLPClassifier
 from collections import defaultdict
 from sklearn import metrics
-from sklearn.preprocessing import normalize
 from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score
-
+import data
 
 #Functions Segment
 def mlp_split(X,Y,percentage,mlp):
@@ -44,18 +42,8 @@ def mlp_use_kfolds(X,Y,n_splits,mlp):
 
 #End of Functions Segment
 
+X, Y, X_test = data.get(normalize_X=True, fill_na=True, verbose=True)
 
-#File names
-fv = './facies_vectors.csv'
-test_data = './test_data_nofacies.csv'
-
-#Reading CSVs
-fv_df = pd.read_csv(fv)
-test_data_df = pd.read_csv(test_data)
-
-#Dealing with NaNs
-fv_df = fv_df.fillna(0)
-test_data_df = test_data_df.fillna(0)
 
 #MLP PARAMS
 hidden_layer_sizes=(4,25)
@@ -80,30 +68,6 @@ beta_1=0.9
 beta_2=0.999
 epsilon=1e-08
 
-
-
-
-
-#DataFrame Exploration
-# print fv_df
-# print 82 * '_'
-# print test_data_df
-
-
-
-
-X_train_df = fv_df[['GR','ILD_log10','PE', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-X = X_train_df.as_matrix()
-X = normalize(X, axis=0)
-Y_train_df = fv_df['Facies']
-Y = Y_train_df.as_matrix()
-
-X_test_df = test_data_df[['GR','ILD_log10','PE', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-X_test = X_test_df.as_matrix()
-# Y_test_df = test_data_df['Facies']
-# Y_test = Y_test_df.as_matrix()
-
-
 mlp = MLPClassifier(hidden_layer_sizes=hidden_layer_sizes, max_iter=max_iter)
 
 print 'PE'
@@ -118,16 +82,8 @@ print 82 * '_'
 
 print 'No PE'
 
-X_train_df = fv_df[['GR','ILD_log10', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-X = X_train_df.as_matrix()
-X = normalize(X, axis=0)
-Y_train_df = fv_df['Facies']
-Y = Y_train_df.as_matrix()
+X, Y, X_test = data.get(without_PE=True, normalize_X=True, fill_na=True, verbose=True)
 
-X_test_df = test_data_df[['GR','ILD_log10', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-X_test = X_test_df.as_matrix()
-# Y_test_df = test_data_df['Facies']
-# Y_test = Y_test_df.as_matrix()
 percentage = .9
 reg_acc = mlp_split(X,Y,percentage,mlp)
 print '\n\nAccuracy at {0:}% Seperation: {1:.2f}\n'.format(percentage*100, reg_acc)

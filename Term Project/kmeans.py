@@ -1,12 +1,9 @@
-import pandas as pd
-import numpy as np
 from sklearn.cluster import KMeans
 from collections import defaultdict
 from sklearn import metrics
-from sklearn.preprocessing import normalize
 from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score
-
+import data
 
 #Functions Segment
 def kmeans_split(X,Y,percentage, km):
@@ -71,57 +68,13 @@ def km_use_kfolds(X,Y,n_splits,km):
 
 #End of Functions Segment
 
-
-#File names
-fv = './facies_vectors.csv'
-test_data = './test_data_nofacies.csv'
-
-#Reading CSVs
-fv_df = pd.read_csv(fv)
-test_data_df = pd.read_csv(test_data)
-
-#Dealing with NaNs
-fv_df = fv_df.fillna(0)
-test_data_df = test_data_df.fillna(0)
+X, Y, X_test = data.get(fill_na=True, show_class_distribution=True, verbose=True) #, normalize_X=True)
 
 #Kmeans PARAMS
 n_clusters = 9
 init='k-means++'
 
 
-print 'Facies 1: {} - {}%'.format(len(fv_df[fv_df['Facies']==1]), len(fv_df[fv_df['Facies']==1])*100/len(fv_df))
-print 'Facies 2: {} - {}%'.format(len(fv_df[fv_df['Facies']==2]), len(fv_df[fv_df['Facies']==2])*100/len(fv_df))
-print 'Facies 3: {} - {}%'.format(len(fv_df[fv_df['Facies']==3]), len(fv_df[fv_df['Facies']==3])*100/len(fv_df))
-print 'Facies 4: {} - {}%'.format(len(fv_df[fv_df['Facies']==4]), len(fv_df[fv_df['Facies']==4])*100/len(fv_df))
-print 'Facies 5: {} - {}%'.format(len(fv_df[fv_df['Facies']==5]), len(fv_df[fv_df['Facies']==5])*100/len(fv_df))
-print 'Facies 6: {} - {}%'.format(len(fv_df[fv_df['Facies']==6]), len(fv_df[fv_df['Facies']==6])*100/len(fv_df))
-print 'Facies 7: {} - {}%'.format(len(fv_df[fv_df['Facies']==7]), len(fv_df[fv_df['Facies']==7])*100/len(fv_df))
-print 'Facies 8: {} - {}%'.format(len(fv_df[fv_df['Facies']==8]), len(fv_df[fv_df['Facies']==8])*100/len(fv_df))
-print 'Facies 9: {} - {}%'.format(len(fv_df[fv_df['Facies']==9]), len(fv_df[fv_df['Facies']==9])*100/len(fv_df))
-
-
-print '\n\n'
-print 82 * '_'
-
-
-
-
-#DataFrame Exploration
-# print fv_df
-# print 82 * '_'
-# print test_data_df
-
-
-X_train_df = fv_df[['GR','ILD_log10','PE', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-X = X_train_df.as_matrix()
-# X_train = normalize(X_train, axis=0)
-Y_train_df = fv_df['Facies']
-Y = Y_train_df.as_matrix()
-
-X_test_df = test_data_df[['GR','ILD_log10','PE', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-X_test = X_test_df.as_matrix()
-# Y_test_df = test_data_df['Facies']
-# Y_test = Y_test_df.as_matrix()
 
 print 'PE'
 km = KMeans(n_clusters=n_clusters, init=init)
@@ -137,16 +90,7 @@ print 82 * '_'
 
 print 'NO PE'
 
-X_train_df = fv_df[['GR','ILD_log10','DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-X = X_train_df.as_matrix()
-# X_train = normalize(X_train, axis=0)
-Y = fv_df['Facies']
-Y_train = Y_train_df.as_matrix()
-
-X_test_df = test_data_df[['GR','ILD_log10', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']]
-X_test = X_test_df.as_matrix()
-# Y_test_df = test_data_df['Facies']
-# Y_test = Y_test_df.as_matrix()
+X, Y, X_test = data.get(without_PE=True, fill_na=True, verbose=True) #, normalize_X=True)
 
 
 km = KMeans(n_clusters=n_clusters, init=init)
