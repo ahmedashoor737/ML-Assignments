@@ -34,6 +34,19 @@ def use_SVC_reg(X,Y,percentage,svc):
     y_hat = svc.predict(X_vald)
     return accuracy_score(Y_vald, y_hat)
 
+def get_class_weights(df_Y):
+    labels = np.unique(df_Y)
+    class_count = []
+    for i in range(0,len(labels)):
+        class_count.append(len(df_Y[df_Y == labels[i]]))
+
+    weights = {}
+    for i in range(0, len(class_count)):
+        weights[labels[i]] = len(df_Y) / (len(labels) * class_count[i])
+    
+    return weights
+
+
 #End of Functions Segment
 
 
@@ -69,7 +82,7 @@ X = X.as_matrix()
 Y = fv_df['Facies']
 Y = Y.as_matrix()
 
-svc = SVC(decision_function_shape='ovo', kernel='rbf')
+svc = SVC(decision_function_shape='ovr', kernel='rbf', C=2)
 
 percentage = .9
 reg_acc = use_SVC_reg(X,Y,percentage,svc)
