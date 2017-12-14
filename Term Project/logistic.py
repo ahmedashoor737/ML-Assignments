@@ -18,8 +18,10 @@ fill
 normalize_X: Worse score when normalized!
 balance_data: increases score on average
 '''
-X, y, X_no_labels = data.get(fill_na_strategy='mean', balance_data=True, verbose=True)
-
+keep = 5
+X, y, X_no_labels, PCA = data.get(fill_na_strategy='mean', balance_data=True,
+	keep=keep, reduce_X_PCA=True,
+	verbose=True)
 # splits randomly
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
 
@@ -31,6 +33,14 @@ Parameters:
  optional: verbose, n_jobs
 '''
 lr_classifier = LogisticRegression(multi_class='multinomial', solver='newton-cg')
+lr_classifier.fit(X_train, y_train)
+y_test_predict = lr_classifier.predict(X_test)
+print_performance('LR na_mean balanced (multinomial newton-cg) PCA {} features PE'.format(keep), y_test, y_test_predict)
+
+
+X, y, X_no_labels = data.get(fill_na_strategy='mean', balance_data=True,
+	verbose=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
 lr_classifier.fit(X_train, y_train)
 y_test_predict = lr_classifier.predict(X_test)
 print_performance('LR na_mean balanced (multinomial newton-cg) PE', y_test, y_test_predict)

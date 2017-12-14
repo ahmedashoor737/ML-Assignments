@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.preprocessing import normalize
 from sklearn.preprocessing import Imputer
+from sklearn.decomposition import PCA
 
 #File names
 fv = './facies_vectors.csv'
@@ -19,16 +20,44 @@ def read_dataframes():
 
 	return fv_df, test_data_df
 	
+'''
+Parameters (mostly boolean)
+ without_PE: exclude PE feature.
+ normalize_X: normalizes X (maybe should return the norm).
 
+ fill_na: Replace missing with 0.
+ fill_na_strategy: Replace missing using the strategy. Can be 'mean', 'median', or 'most_frequent'.
+ 
+ keep:
+   If not None, will return object of class PCA.
+   If int, number of features to reduce to.
+   See PCA class for possible values.
+ reduce_X_PCA: X will be reduced using PCA.reduce()
+ reduce_X_test_PCA: X_test will be reduced too.
+
+ balance_data: Make class distribution equal.
+ show_class_distribution: Print class distribution.
+
+Return
+ X: features of facies_vectors.csv
+ Y: labels of facies_vectors.csv
+ X_test: features of test_data_nofacies.csv
+ PCA_X: of class PCA which has method transform(X). Not returned if keep=None
+'''
 def get(
 	without_PE=False,
 	normalize_X=False,
 	fill_na=False, fill_na_strategy=None,
+	keep=None, reduce_X_PCA=False, reduce_X_test_PCA=False,
 	balance_data=False,
 	show_class_distribution=False, verbose=False):
 
 	# Can't activate both
 	assert not (fill_na and fill_na_strategy)
+	# Can't reduce unless keep is given
+	assert not ((not keep) and (reduce_X_PCA or reduce_X_test_PCA))
+	# No need to normalized if reducing X
+	assert not (normalize_X and reduce_X_PCA)
 
 	fv_df, test_data_df = read_dataframes()
 
@@ -62,10 +91,21 @@ def get(
 		X = imp.fit_transform(X)
 		X_test = imp.fit_transform(X_test)
 
+	if keep:
+		PCA_X = PCA(keep)
+		PCA_X.fit(X)
+		if reduce_X_PCA:
+			X = PCA_X.transform(X)
+		if reduce_X_test_PCA:
+			X_test = PCA_X.transform(X_test)
+
 	if normalize_X:
 		X = normalize(X, axis=0)
 
-	return X, Y, X_test
+	if keep:
+		return X, Y, X_test, PCA_X
+	else:
+		return X, Y, X_test
 
 def balanced(fv_df, verbose=False):
 	if verbose:
