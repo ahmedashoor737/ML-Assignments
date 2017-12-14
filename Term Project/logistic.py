@@ -1,53 +1,58 @@
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
-from our_metrics import print_performance
+# Data, metrics
 import data
+from sklearn.metrics import accuracy_score, make_scorer
+from our_metrics import relaxed_accuracy, report_performance
 
-#Function Segment
+# Caching for grid Search
+from tempfile import mkdtemp
+from shutil import rmtree
+from sklearn.model_selection import GridSearchCV
 
-#End of Functions Segment
+# Pipeline, preprocessing, and classifier
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import Imputer
+from sklearn.preprocessing import Normalizer
+from sklearn.decomposition import PCA
+from sklearn.linear_model import LogisticRegression
+
+def find_best_estimator(X, y):
+	cachedir = mkdtemp()
+
+	# Classifier and preprocessing
+	pipe = Pipeline([
+		('impute', Imputer()),
+		('reduce_dim', PCA()),
+		('clf', LogisticRegression())],
+		memory=cachedir)
+
+	# Parameter and preprocessing tuning space
+	param_grid = [
+		{
+			'impute__strategy': ['mean', 'median', 'most_frequent'],
+			'reduce_dim': [None, Normalizer(), PCA(4), PCA(5), PCA(6)],
+			'clf__C': [0.001, 0.01, 0.1, 1, 10, 100],
+			'clf__class_weight': [None, 'balanced']
+		}
+	]
+
+	# Search using relaxed metric
+	grid = GridSearchCV(pipe, param_grid, scoring=make_scorer(relaxed_accuracy))
+
+	# start search
+	grid.fit(X, y)
+
+	rmtree(cachedir)
+
+	return grid
 
 # With PE
-'''
-fill
-  fill_na
-  fill_na_strategy: score a little bit higher than fill_na
-    mean
-    median
-    most_frequent
-normalize_X: Worse score when normalized!
-balance_data: increases score on average
-'''
-keep = 5
-X, y, X_no_labels, PCA = data.get(fill_na_strategy='mean', balance_data=True,
-	keep=keep, reduce_X_PCA=True,
-	verbose=True)
-# splits randomly
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-
-'''
-Parameters:
- penalty (l1, l2), tol (tolerance), C, intercept_scaling, class_weight
- solver, max_iter, multi_class (ovr, multinomial), warm_start
- default is ok: dual, fit_intercept, random_state
- optional: verbose, n_jobs
-'''
-lr_classifier = LogisticRegression(multi_class='multinomial', solver='newton-cg')
-lr_classifier.fit(X_train, y_train)
-y_test_predict = lr_classifier.predict(X_test)
-print_performance('LR na_mean balanced (multinomial newton-cg) PCA {} features PE'.format(keep), y_test, y_test_predict)
-
-
-X, y, X_no_labels = data.get(fill_na_strategy='mean', balance_data=True,
-	verbose=True)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-lr_classifier.fit(X_train, y_train)
-y_test_predict = lr_classifier.predict(X_test)
-print_performance('LR na_mean balanced (multinomial newton-cg) PE', y_test, y_test_predict)
+name = 'LR PE'
+X, y, X_no_labels = data.get()
+grid = find_best_estimator(X, y)
+report_performance(name, grid, X, y)
 
 # Without PE
-X, y, X_no_labels = data.get(without_PE=True, fill_na_strategy='mean', balance_data=True, verbose=True)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-lr_classifier.fit(X_train, y_train)
-y_test_predict = lr_classifier.predict(X_test)
-print_performance('LR na_mean balanced (multinomial newton-cg) No PE', y_test, y_test_predict)
+name = 'LR No PE'
+X, y, X_no_labels = data.get(without_PE=True)
+grid = find_best_estimator(X, y)
+report_performance(name, grid, X, y)
