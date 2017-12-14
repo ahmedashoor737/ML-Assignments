@@ -1,8 +1,8 @@
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, accuracy_score
 
 # Consider it true if adjacent according to adjacency table
 def relaxed_accuracy(y_true, y_pred):
-	matrix = confusion_matrix(y_true, y_pred)
+	matrix = confusion_matrix(y_true, y_pred, labels=[0,1,2,3,4,5,6,7,8])
 
 	correct = 0.0
 	total = 0.0
@@ -32,6 +32,11 @@ def relaxed_accuracy(y_true, y_pred):
 			total += samples_of_i_predicted_as_j
 
 	return correct / total
+
+def print_performance(classifier_name, y_true, y_pred):
+	print classifier_name
+	print ' accuracy:', accuracy_score(y_true, y_pred)
+	print ' relaxed:', relaxed_accuracy(y_true, y_pred), '\n'
 
 if __name__ == '__main__':
 	print 'Testing relaxed_accuracy()'

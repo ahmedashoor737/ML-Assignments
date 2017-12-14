@@ -1,7 +1,6 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-from our_metrics import relaxed_accuracy
+from our_metrics import print_performance
 import data
 
 #Function Segment
@@ -34,13 +33,11 @@ Parameters:
 lr_classifier = LogisticRegression(multi_class='multinomial', solver='newton-cg')
 lr_classifier.fit(X_train, y_train)
 y_test_predict = lr_classifier.predict(X_test)
-print 'PE accuracy: ', accuracy_score(y_test, y_test_predict)
-print 'PE relaxed: ', relaxed_accuracy(y_test, y_test_predict)
+print_performance('LR na_mean balanced (multinomial newton-cg) PE', y_test, y_test_predict)
 
 # Without PE
 X, y, X_no_labels = data.get(without_PE=True, fill_na_strategy='mean', balance_data=True, verbose=True)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
 lr_classifier.fit(X_train, y_train)
 y_test_predict = lr_classifier.predict(X_test)
-print 'No PE accuracy: ', accuracy_score(y_test, y_test_predict)
-print 'No PE relaxed: ', relaxed_accuracy(y_test, y_test_predict)
+print_performance('LR na_mean balanced (multinomial newton-cg) No PE', y_test, y_test_predict)
