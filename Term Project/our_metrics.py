@@ -1,4 +1,6 @@
-from sklearn.metrics import confusion_matrix, accuracy_score
+import numpy as np
+from sklearn.metrics import confusion_matrix, accuracy_score, make_scorer
+from sklearn.model_selection import train_test_split, cross_validate
 
 # Consider it true if adjacent according to adjacency table
 def relaxed_accuracy(y_true, y_pred):
@@ -33,10 +35,51 @@ def relaxed_accuracy(y_true, y_pred):
 
 	return correct / total
 
+# k: run 5 times by default
+def report_performance(name, grid, X, y, k=5):
+	clf = grid.best_estimator_
+
+	scoring = {'relaxed': make_scorer(relaxed_accuracy), 'accuracy': make_scorer(accuracy_score)}
+	scores = cross_validate(clf, X, y, scoring=scoring, cv=k, return_train_score=True)
+
+	print name
+	print '\n ', grid.best_params_, '\n'
+
+	import numpy as np
+
+	print ' Accuracy avg train {:.2f} | test {:.2f}'.format(np.mean(scores['train_accuracy']), np.mean(scores['test_accuracy']))
+	print ' Relaxed  avg train {:.2f} | test {:.2f}'.format(np.mean(scores['train_relaxed']), np.mean(scores['test_relaxed']))
+
 def print_performance(classifier_name, y_true, y_pred):
+	accuracy = accuracy_score(y_true, y_pred)
+	relaxed = relaxed_accuracy(y_true, y_pred)
+
 	print classifier_name
-	print ' accuracy:', accuracy_score(y_true, y_pred)
-	print ' relaxed:', relaxed_accuracy(y_true, y_pred), '\n'
+	print ' accuracy:', accuracy
+	print ' relaxed:', relaxed, '\n'
+
+	return accuracy, relaxed
+
+def print_multiple(name, k, clf, X, y, print_all=False):
+	accuracies = []
+	relaxed_scores = []
+	for i in xrange(k):
+		X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+		clf.fit(X_train, y_train)
+		y_test_predict = clf.predict(X_test)
+
+		if print_all:
+			accuracy, relaxed = print_performance('{}. {}'.format(k, name), y_test, y_test_predict)
+		else:
+			accuracy = accuracy_score(y_test, y_test_predict)
+			relaxed = relaxed_accuracy(y_test, y_test_predict)
+
+		accuracies.append(accuracy)
+		relaxed_scores.append(relaxed)
+
+	print name
+	print ' max / avg accuracy:', max(accuracies), np.mean(accuracies)
+	print ' max / avg relaxed: ' , max(relaxed_scores), np.mean(relaxed_scores), '\n'
 
 if __name__ == '__main__':
 	print 'Testing relaxed_accuracy()'
