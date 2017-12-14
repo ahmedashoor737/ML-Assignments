@@ -1,6 +1,7 @@
 from sklearn.neural_network import MLPClassifier
 from collections import defaultdict
 from sklearn import metrics
+from our_metrics import print_performance
 import data
 
 #Functions Segment
@@ -49,11 +50,4 @@ mlp.fit(X_train,Y_train)
 
 y_hat = mlp.predict(X_vald)
 
-accuracy = 0.0
-count = 0.0
-for i in range(0, len(y_hat)):
-    if y_hat[i] == Y_vald[i]:
-        count += 1
-
-accuracy = count/len(y_hat)
-print 'Accuracy: {0:.2f}'.format(accuracy)
+print_performance('MLP balanced PE', Y_vald, y_hat)
