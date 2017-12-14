@@ -81,8 +81,8 @@ print_performance('MLP Accuracy at {0:}% Seperation PE:'.format(percentage*100),
 folds = 10
 print 'Using {}-Folds'.format(folds)
 kfold_acc, kfold_relaxed, kfold_ind = mlp_use_kfolds(X, Y, folds, mlp)
-print 'KFolds Accuracies: {0:},\nhighest: {1:.2f} - {2:}'.format(kfold_acc,kfold_acc[np.argmax(kfold_acc)], kfold_ind[np.argmax(kfold_acc)])
-print 'KFolds Relaxed: {0:},\nhighest: {1:.2f} - {2:}'.format(kfold_relaxed,kfold_relaxed[np.argmax(kfold_relaxed)], kfold_ind[np.argmax(kfold_relaxed)])
+print 'KFolds Accuracies: {0:},\nhighest: {1:.2f} - {2:},\nAverage: {3:.2f}'.format(kfold_acc,kfold_acc[np.argmax(kfold_acc)], kfold_ind[np.argmax(kfold_acc)], np.mean(kfold_acc))
+print 'KFolds Relaxed: {0:},\nhighest: {1:.2f} - {2:},\nAverage: {3:.2f}'.format(kfold_relaxed,kfold_relaxed[np.argmax(kfold_relaxed)], kfold_ind[np.argmax(kfold_relaxed)], np.mean(kfold_relaxed))
 print 82 * '_'
 
 print 'No PE'
@@ -96,6 +96,6 @@ print_performance('MLP Accuracy at {0:}% Seperation no PE:'.format(percentage*10
 folds = 10
 print 'Using {}-Folds'.format(folds)
 kfold_acc, kfold_relaxed, kfold_ind = mlp_use_kfolds(X, Y, folds, mlp)
-print 'KFolds Accuracies: {0:},\nhighest: {1:.2f} - {2:}'.format(kfold_acc,kfold_acc[np.argmax(kfold_acc)], kfold_ind[np.argmax(kfold_acc)])
-print 'KFolds Relaxed: {0:},\nhighest: {1:.2f} - {2:}'.format(kfold_relaxed,kfold_relaxed[np.argmax(kfold_relaxed)], kfold_ind[np.argmax(kfold_relaxed)])
+print 'KFolds Accuracies: {0:},\nhighest: {1:.2f} - {2:},\nAverage: {3:.2f}'.format(kfold_acc,kfold_acc[np.argmax(kfold_acc)], kfold_ind[np.argmax(kfold_acc)], np.mean(kfold_acc))
+print 'KFolds Relaxed: {0:},\nhighest: {1:.2f} - {2:},\nAverage: {3:.2f}'.format(kfold_relaxed,kfold_relaxed[np.argmax(kfold_relaxed)], kfold_ind[np.argmax(kfold_relaxed)], np.mean(kfold_relaxed))
 print 82 * '_'

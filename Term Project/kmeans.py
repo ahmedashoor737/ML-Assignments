@@ -85,7 +85,7 @@ print 'Accuracy at {0:}% Seperation: {1:}\n'.format(percentage*100, reg_acc)
 folds = 10
 print 'Using {}-Folds'.format(folds)
 kfold_purities, kfold_ind = km_use_kfolds(X,Y,folds,km)
-print 'KFolds Purities: {0:},\nhighest: {1:.2f} - {2:}'.format(kfold_purities,kfold_purities[np.argmax(kfold_purities)], kfold_ind[np.argmax(kfold_purities)])
+print 'KFolds Purities: {0:},\nhighest: {1:.2f} - {2:},\nAverage: {3:.2f}'.format(kfold_purities,kfold_purities[np.argmax(kfold_purities)], kfold_ind[np.argmax(kfold_purities)], np.mean(kfold_purities))
 print 82 * '_'
 
 print 'NO PE'
@@ -101,5 +101,5 @@ print 'Accuracy at {0:}% Seperation: {1:}\n'.format(percentage*100, reg_acc)
 folds = 10
 print 'Using {}-Folds'.format(folds)
 kfold_purities, kfold_ind = km_use_kfolds(X,Y,folds,km)
-print 'KFolds Purities: {0:},\nhighest: {1:.2f} - {2:}'.format(kfold_purities,kfold_purities[np.argmax(kfold_purities)], kfold_ind[np.argmax(kfold_purities)])
+print 'KFolds Purities: {0:},\nhighest: {1:.2f} - {2:},\nAverage: {3:.2f}'.format(kfold_purities,kfold_purities[np.argmax(kfold_purities)], kfold_ind[np.argmax(kfold_purities)], np.mean(kfold_purities))
 print 82 * '_'
