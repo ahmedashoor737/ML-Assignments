@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.preprocessing import normalize
+from sklearn.preprocessing import Imputer
 
 #File names
 fv = './facies_vectors.csv'
@@ -22,12 +23,16 @@ def read_dataframes():
 def get(
 	without_PE=False,
 	normalize_X=False,
-	fill_na=False,
+	fill_na=False, fill_na_strategy=None,
 	balance_data=False,
 	show_class_distribution=False, verbose=False):
 
+	# Can't activate both
+	assert not (fill_na and fill_na_strategy)
+
 	fv_df, test_data_df = read_dataframes()
 
+	# Fill NaN with 0
 	if fill_na:
 		fv_df = fv_df.fillna(0)
 		test_data_df = test_data_df.fillna(0)
@@ -41,19 +46,24 @@ def get(
 	features = ['GR','ILD_log10','PE', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']
 	if without_PE:
 		features = ['GR','ILD_log10', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']
-
-	X_df = fv_df[features]
-	X = X_df.as_matrix()
-	if normalize_X:
-		X = normalize(X, axis=0)
-	
 	the_class = 'Facies'
 
-	Y_df = fv_df[the_class]
-	Y = Y_df.as_matrix()
-
+	X_df = fv_df[features]
 	X_test_df = test_data_df[features]
+	Y_df = fv_df[the_class]
+
+	X = X_df.as_matrix()
 	X_test = X_test_df.as_matrix()
+	Y = Y_df.as_matrix()
+	
+	if fill_na_strategy:
+		# Fill NaN either with strategy=mean or median or most_frequent
+		imp = Imputer(strategy=fill_na_strategy)
+		X = imp.fit_transform(X)
+		X_test = imp.fit_transform(X_test)
+
+	if normalize_X:
+		X = normalize(X, axis=0)
 
 	return X, Y, X_test
 
