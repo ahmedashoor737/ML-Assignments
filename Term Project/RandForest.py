@@ -51,7 +51,7 @@ X, Y, X_test = data.get(normalize_X=True, fill_na=True, verbose=True)
 
 
 
-rand_forest = RandomForestClassifier(max_depth=2, random_state=0)
+rand_forest = RandomForestClassifier(max_depth=10, random_state=0)
 
 print 'PE'
 percentage = .9
