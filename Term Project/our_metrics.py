@@ -32,20 +32,25 @@ def relaxed_accuracy(y_true, y_pred):
 				correct += samples_of_i_predicted_as_j
 
 			total += samples_of_i_predicted_as_j
-
+	# print correct, total
 	return correct / total
 
 # k: run 5 times by default
-def report_performance(name, grid, X, y, k=5):
-	clf = grid.best_estimator_
+def report_performance(name, X, y, k=5, grid=None, clf=None):
+	# grid or clf, not both
+	assert (grid and (not clf)) or ((not grid) and clf)
+
+	if grid:
+		clf = grid.best_estimator_
 
 	scoring = {'relaxed': make_scorer(relaxed_accuracy), 'accuracy': make_scorer(accuracy_score)}
 	scores = cross_validate(clf, X, y, scoring=scoring, cv=k, return_train_score=True)
 
 	print name
-	print '\n ', grid.best_params_, '\n'
-
-	import numpy as np
+	if grid:
+		print '\n ', grid.best_params_, '\n'
+	else:
+		print '\n ', clf.get_params(), '\n'
 
 	print ' Accuracy avg train {:.2f} | test {:.2f}'.format(np.mean(scores['train_accuracy']), np.mean(scores['test_accuracy']))
 	print ' Relaxed  avg train {:.2f} | test {:.2f}'.format(np.mean(scores['train_relaxed']), np.mean(scores['test_relaxed']))

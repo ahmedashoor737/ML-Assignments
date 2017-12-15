@@ -49,10 +49,10 @@ def find_best_estimator(X, y):
 name = 'LR PE'
 X, y, X_no_labels = data.get()
 grid = find_best_estimator(X, y)
-report_performance(name, grid, X, y)
+report_performance(name, X, y, grid=grid)
 
 # Without PE
 name = 'LR No PE'
 X, y, X_no_labels = data.get(without_PE=True)
 grid = find_best_estimator(X, y)
-report_performance(name, grid, X, y)
+report_performance(name, X, y, grid=grid)
