@@ -36,19 +36,23 @@ def relaxed_accuracy(y_true, y_pred):
 	return correct / total
 
 # k: run 5 times by default
-def report_performance(name, grid, X, y, k=5):
+def report_performance(name, grid, X_train, y_train, X_test, y_test, k=5):
 	clf = grid.best_estimator_
 
-	scoring = {'relaxed': make_scorer(relaxed_accuracy), 'accuracy': make_scorer(accuracy_score)}
-	scores = cross_validate(clf, X, y, scoring=scoring, cv=k, return_train_score=True)
+	# scoring = {'relaxed': make_scorer(relaxed_accuracy), 'accuracy': make_scorer(accuracy_score)}
+	# scores = cross_validate(clf, X, y, scoring=scoring, cv=k, return_train_score=True)
 
 	print name
 	print '\n ', grid.best_params_, '\n'
 
-	import numpy as np
+	# import numpy as np
+	print ' Accuracy -Train {:.2f}'.format(accuracy_score(y_train, clf.predict(X_train)))
+	print ' Relaxed  -Train {:.2f}'.format(relaxed_accuracy(y_train, clf.predict(X_train)))
 
-	print ' Accuracy avg train {:.2f} | test {:.2f}'.format(np.mean(scores['train_accuracy']), np.mean(scores['test_accuracy']))
-	print ' Relaxed  avg train {:.2f} | test {:.2f}'.format(np.mean(scores['train_relaxed']), np.mean(scores['test_relaxed']))
+	print ' Accuracy -Test {:.2f}'.format(accuracy_score(y_test, clf.predict(X_test)))
+	print ' Relaxed  -Test {:.2f}'.format(relaxed_accuracy(y_test, clf.predict(X_test)))
+	# print ' Accuracy avg train {:.2f} | test {:.2f}'.format(np.mean(scores['train_accuracy']), np.mean(scores['test_accuracy']))
+	# print ' Relaxed  avg train {:.2f} | test {:.2f}'.format(np.mean(scores['train_relaxed']), np.mean(scores['test_relaxed']))
 
 def print_performance(classifier_name, y_true, y_pred):
 	accuracy = accuracy_score(y_true, y_pred)
