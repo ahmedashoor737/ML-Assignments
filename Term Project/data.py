@@ -2,7 +2,12 @@ import pandas as pd
 from sklearn.preprocessing import normalize
 from sklearn.preprocessing import Imputer
 from sklearn.decomposition import PCA
-
+from sklearn.pipeline import Pipeline
+from shutil import rmtree
+from tempfile import mkdtemp
+from sklearn.metrics import make_scorer
+from our_metrics import relaxed_accuracy
+from sklearn.model_selection import GridSearchCV
 #File names
 fv = './facies_vectors.csv'
 test_data = './test_data_nofacies.csv'
@@ -44,33 +49,27 @@ Return
  X_test: features of test_data_nofacies.csv
  PCA_X: of class PCA which has method transform(X). Not returned if keep=None
 '''
-def get(
-	without_PE=False,
-	normalize_X=False,
-	fill_na=False, fill_na_strategy=None,
-	keep=None, reduce_X_PCA=False, reduce_X_test_PCA=False,
-	balance_data=False,
-	show_class_distribution=False, verbose=False):
+def find_best_estimator(X, y, tranformers, 	param_grid):
+	cachedir = mkdtemp()
 
-	# Can't activate both
-	assert not (fill_na and fill_na_strategy)
-	# Can't reduce unless keep is given
-	assert not ((not keep) and (reduce_X_PCA or reduce_X_test_PCA))
-	# No need to normalized if reducing X
-	assert not (normalize_X and reduce_X_PCA)
+	# Classifier and preprocessing
+	pipe = Pipeline(tranformers,
+		memory=cachedir)
 
+	# Search using relaxed metric
+	grid = GridSearchCV(pipe, param_grid, scoring=make_scorer(relaxed_accuracy))
+
+	# start search
+	grid.fit(X, y)
+
+	rmtree(cachedir)
+
+	return grid
+def get(without_PE=False, show_class_distribution=False):
 	fv_df, test_data_df = read_dataframes()
 
-	# Fill NaN with 0
-	if fill_na:
-		fv_df = fv_df.fillna(0)
-		test_data_df = test_data_df.fillna(0)
-
-	if balance_data:
-		fv_df = balanced(fv_df, verbose=show_class_distribution)
-	elif show_class_distribution:
+	if show_class_distribution:
 		print_distribution(fv_df)
-
 
 	features = ['GR','ILD_log10','PE', 'DeltaPHI', 'PHIND', 'NM_M', 'RELPOS']
 	if without_PE:
@@ -78,35 +77,14 @@ def get(
 	the_class = 'Facies'
 
 	X_df = fv_df[features]
-	X_test_df = test_data_df[features]
+	# X_test_df = test_data_df[features]
 	Y_df = fv_df[the_class]
 
 	X = X_df.as_matrix()
-	X_test = X_test_df.as_matrix()
+	# X_test = X_test_df.as_matrix()
 	Y = Y_df.as_matrix()
-	
-	if fill_na_strategy:
-		# Fill NaN either with strategy=mean or median or most_frequent
-		imp = Imputer(strategy=fill_na_strategy)
-		X = imp.fit_transform(X)
-		X_test = imp.fit_transform(X_test)
 
-	if keep:
-		PCA_X = PCA(keep)
-		PCA_X.fit(X)
-		if reduce_X_PCA:
-			X = PCA_X.transform(X)
-		if reduce_X_test_PCA:
-			X_test = PCA_X.transform(X_test)
-
-	if normalize_X:
-		X = normalize(X, axis=0)
-
-	if keep:
-		return X, Y, X_test, PCA_X
-	else:
-		return X, Y, X_test
-
+	return X, Y
 def balanced(fv_df, verbose=False):
 	if verbose:
 		# before balance
